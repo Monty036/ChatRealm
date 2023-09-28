@@ -1,0 +1,10 @@
+FROM node
+WORKDIR /app/client
+ENV WATCHPACK_POLLING=true
+COPY public ./public
+COPY src ./src
+COPY package*.json .
+COPY tailwind.config.js .
+RUN npm install
+EXPOSE 3000
+CMD [ "npm", "run", "start"]

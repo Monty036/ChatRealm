@@ -1,0 +1,31 @@
+FROM node
+
+# Install Backend Packages
+WORKDIR /app
+COPY package*.json /app
+RUN npm install
+
+# Install Frontend Packages
+WORKDIR /app/client
+COPY ./client/package*.json /app/client
+RUN npm install
+
+# Copy Backend Project
+WORKDIR /app
+COPY server ./server
+
+# Copy Frontend Project
+WORKDIR /app/client
+COPY ./client/public/ /app/client/public
+COPY ./client/src/ /app/client/src
+COPY ./client/tailwind.config.* /app/client/
+
+# Build React Project
+ENV PORT=3000
+ENV NODE_ENV=production
+RUN npm run build
+
+# Start Express Server
+WORKDIR /app
+EXPOSE 3000
+ENTRYPOINT ["npm","run","start"]
