@@ -28,7 +28,7 @@
  
  **Department:** Electrical Engineering
  
- **System design doc:**  [Design Doc](https://github.com/Monty036/ChatRealm) 
+ **System design doc:**  [Design Doc](https://docs.google.com/document/d/1UjTGPZ_RTwUX1WiUDtQ4II8VyUepB8LxshRtleQYEWU/edit?usp=sharing) 
  
  **Deployed Link:**  [Link](https://chatapp-prod.onrender.com/) 
  
