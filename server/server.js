@@ -1,6 +1,9 @@
 const express = require("./config/express.js");
 const mongoose = require("mongoose");
 const dotenv = require('dotenv');
+const { Server } = require('socket.io');
+const { protect } = require('./middleware/socketMiddleware.js');
+
 
 dotenv.config();
 
@@ -9,13 +12,20 @@ const port = process.env.PORT || 5000;
 //establish socket.io connection
 const app = express.init();
 const server = require("http").createServer(app);
-const io = require("socket.io")(server);
+const serverOptions = {};
+if(process.env.NODE_ENV == 'development') {
+  serverOptions.cors = { origin: 'http://localhost:3000', credentials: true };
+}
+
+// Enable Socket.io authMiddleware
+const io = new Server(server, serverOptions);
+io.of(/.*/).use(protect);
 
 io.of("/api/socket").on("connection", (socket) => {
-  console.log("socket.io: User connected: ", socket.id);
+  if(process.env.NODE_ENV === 'development') console.log("socket.io: User connected: ", socket.user.username);
 
   socket.on("disconnect", () => {
-    console.log("socket.io: User disconnected: ", socket.id);
+    console.log("socket.io: User disconnected: ", socket.user.username);
   });
 });
 

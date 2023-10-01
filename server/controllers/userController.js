@@ -1,9 +1,12 @@
 const User = require('../models/User');
+const FriendRequest = require('../models/FriendRequest');
 const asyncHandler = require('express-async-handler');
+const jwt = require('jsonwebtoken');
 
 // UTILS
 const generateToken = require('../utils/generateJwtToken');
 const generateUsername = require('../utils/generateUsername');
+const { findUsers } = require('../utils/friendUtils');
 
 
 const authUser = asyncHandler(async (req, res) => {
@@ -20,7 +23,7 @@ const authUser = asyncHandler(async (req, res) => {
 
     if(user && (await user.matchPassword(password))) {
         generateToken(res, user._id);
-        res.status(200).json({ message: "Login Successful.", data: user.getUserData() });
+        res.json({ message: "/auth Successful.", data: user.getUserData() });
     } else {
         res.status(401);
         throw new Error("Invalid Email or password!");
@@ -43,7 +46,7 @@ const registerUser = asyncHandler(async (req, res) => {
 
     if(user) {
         generateToken(res, user._id);
-        res.status(201).json({ message: "Register Successful", data: user.getUserData() });
+        res.status(201).json({ message: "/register Successful", data: user.getUserData() });
     } else {
         res.status(400);
         throw new Error('Invalid User Data.');
@@ -56,44 +59,61 @@ const logoutUser = asyncHandler(async (req, res) => {
         httpOnly: true,
         expires: new Date(0),
     });
-    res.status(200).json({ message: 'Logged out successfully' });
+    res.status(200).json({ message: '/logout Successful' });
 })
 
-const getProfile = asyncHandler(async (req, res) => {
-    if(!req.user) {
-        res.status(401);
-        throw new Error('Unauthorized Access to Protected Route. Please login again.');
-    }
-    res.status(200).json({ message: '/getProfile Successful', data: req.user });
-})
+const findUser = asyncHandler(async (req, res) => {
+    const { _id } = req.user;
+    const { friendId } = req.body;
 
-const updateProfile = asyncHandler(async (req, res) => {
-    if(!req.user) {
-        res.status(401);
-        throw new Error('Unauthorized Access to Protected Route. Please login again.');
-    }
+    res.status(200).json({ message: "/find_user Successful", data: await findUsers(_id, friendId) });
+});
 
-    const _id = req.user._id;
-    
-    // Prevent any request from updating user critical values
-    delete req.body._id;
-    delete req.body.email;
-    delete req.body.password;
-    const user = await User.findOneAndUpdate({ _id }, req.body, { new: true });
+const addFriendRequest = asyncHandler(async (req, res) => {
+    const { toUser: toUsername } = req.body;
+    const fromUser = await User.findById(req.user._id);
 
-    if(user) {
-        res.status(200).json({ message: '/updateProfile Successful', data: user.getUserData() });
-    } else {
+    // Check if the toUser exists
+    const toUser = await User.findOne({ username: toUsername }, 'friendRequests');
+    if(!toUser) {
         res.status(400);
-        throw new Error('No such user found. Please login again.');
-    }
-})
+        throw new Error('Could not send Friend Request. User not found.');
+    } 
+    const toUserId = toUser._id;
 
+    // Check for a already pending request to toUser
+    await fromUser.populate('friendRequests', 'toUser');
+    const duplicate = fromUser.friendRequests.filter((fr) => fr.toUser === toUserId);
+    if(duplicate.length > 0) {
+        res.status(400);
+        throw new Error('Friend Request has already sent.');
+    } 
+    
+    const fromUserId = fromUser._id;
+    
+    const friendRequest = await FriendRequest.create({ fromUser: fromUserId, toUser: toUserId });
+    fromUser.friendRequests.push(friendRequest._id);
+    toUser.friendRequests.push(friendRequest._id);
+
+    await fromUser.save();
+    await toUser.save();
+    await friendRequest.populate([
+        {
+            path: 'toUser',
+            select: 'fullname username profilePic -_id'
+        },
+        {
+            path: 'fromUser',
+            select: 'fullname username profilePic -_id'
+        }
+    ]);
+    res.json({ message: 'POST /user/friend Successful', data: friendRequest });
+});
 
 module.exports = {
     authUser,
     registerUser,
     logoutUser,
-    getProfile,
-    updateProfile,
+    findUser,
+    addFriendRequest
 };

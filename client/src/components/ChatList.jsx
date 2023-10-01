@@ -1,147 +1,30 @@
+import { useSelector } from "react-redux";
 import EachChat from "./EachChat";
-import GroupChat from "./GroupChat";
-
-const contactList= [
-  {
-      name: "John Doe",
-      lastMessage: "Hello there!",
-      lastTime: "2023-09-20 ",
-      userImage: "https://randomuser.me/api/portraits/thumb/men/76.jpg" // Provide the file path or URL to the user's image
-    },
-    {
-      name: "Alice Smith",
-      lastMessage: "Sure, I'll be there!",
-      lastTime: "2023-09-19 ",
-      userImage: "https://randomuser.me/api/portraits/thumb/men/70.jpg"
-    },
-    {
-      name: "Bob Johnson",
-      lastMessage: "What's up?",
-      lastTime: "2023-09-18",
-      userImage: "https://randomuser.me/api/portraits/thumb/men/71.jpg"
-    },
-    {
-      name: "Eva Davis",
-      lastMessage: "See you tomorrow!",
-      lastTime: "2023-09-17 ",
-      userImage: "https://randomuser.me/api/portraits/thumb/men/72.jpg"
-    },
-    {
-      name: "Sarah Wilson",
-      lastMessage: "Thanks for the help!",
-      lastTime: "2023-09-16 ",
-      userImage: "https://randomuser.me/api/portraits/thumb/men/73.jpg"
-    },
-  {
-    name: "John Doe",
-    lastMessage: "Hello there!",
-    lastTime: "2023-09-20 ",
-    userImage: "https://randomuser.me/api/portraits/thumb/men/76.jpg" // Provide the file path or URL to the user's image
-  },
-  {
-    name: "Alice Smith",
-    lastMessage: "Sure, I'll be there!",
-    lastTime: "2023-09-19 ",
-    userImage: "https://randomuser.me/api/portraits/thumb/men/70.jpg"
-  },
-  {
-    name: "Bob Johnson",
-    lastMessage: "What's up?",
-    lastTime: "2023-09-18",
-    userImage: "https://randomuser.me/api/portraits/thumb/men/71.jpg"
-  },
-  {
-    name: "Eva Davis",
-    lastMessage: "See you tomorrow!",
-    lastTime: "2023-09-17 ",
-    userImage: "https://randomuser.me/api/portraits/thumb/men/72.jpg"
-  },
-  {
-    name: "Sarah Wilson",
-    lastMessage: "Thanks for the help!",
-    lastTime: "2023-09-16 ",
-    userImage: "https://randomuser.me/api/portraits/thumb/men/73.jpg"
-  },
-  {
-    name: "Eva Davis",
-    lastMessage: "See you tomorrow!",
-    lastTime: "2023-09-17 ",
-    userImage: "https://randomuser.me/api/portraits/thumb/men/72.jpg"
-  },
-  {
-    name: "Sarah Wilson",
-    lastMessage: "Thanks for the help!",
-    lastTime: "2023-09-16 ",
-    userImage: "https://randomuser.me/api/portraits/thumb/men/73.jpg"
-  },
-  {
-    name: "Eva Davis",
-    lastMessage: "See you tomorrow!",
-    lastTime: "2023-09-17 ",
-    userImage: "https://randomuser.me/api/portraits/thumb/men/72.jpg"
-  },
-  {
-    name: "Sarah Wilson",
-    lastMessage: "Thanks for the help!",
-    lastTime: "2023-09-16 ",
-    userImage: "https://randomuser.me/api/portraits/thumb/men/73.jpg"
-  },
-  {
-    name: "Eva Davis",
-    lastMessage: "See you tomorrow!",
-    lastTime: "2023-09-17 ",
-    userImage: "https://randomuser.me/api/portraits/thumb/men/72.jpg"
-  },
-  {
-    name: "Sarah Wilson",
-    lastMessage: "Thanks for the help!",
-    lastTime: "2023-09-16 ",
-    userImage: "https://randomuser.me/api/portraits/thumb/men/73.jpg"
-  },
-  {
-    name: "Eva Davis",
-    lastMessage: "See you tomorrow!",
-    lastTime: "2023-09-17 ",
-    userImage: "https://randomuser.me/api/portraits/thumb/men/72.jpg"
-  },
-  {
-    name: "Sarah Wilson",
-    lastMessage: "Thanks for the help!",
-    lastTime: "2023-09-16 ",
-    userImage: "https://randomuser.me/api/portraits/thumb/men/73.jpg"
-  },
-  {
-    name: "Eva Davis",
-    lastMessage: "See you tomorrow!",
-    lastTime: "2023-09-17 ",
-    userImage: "https://randomuser.me/api/portraits/thumb/men/72.jpg"
-  },
-  {
-    name: "Sarah Wilson",
-    lastMessage: "Thanks for the help!",
-    lastTime: "2023-09-16 ",
-    userImage: "https://randomuser.me/api/portraits/thumb/men/73.jpg"
-  }
-];
+import { BsFillChatFill } from 'react-icons/bs';
 
 function ChatList() {
+
+  const { chatRoom } = useSelector((state) => state.chatRoom);
   return (
-      <div className="">
-        <GroupChat
-          Groupname="Backchods"
-          name= "Aman"
-          lastMessage= "Khane Chal"
-          lastTime="023-09-16"
-          userImage= "https://randomuser.me/api/portraits/thumb/men/73.jpg"
-        ></GroupChat>
-        {contactList.map((contact, index) => (
-          <EachChat
-            key={index} name={contact.name} 
-            lastMessage={contact.lastMessage}  
-            lastTime={contact.lastTime} userImage={contact.userImage}
-          />
-        ))}
-      </div>
+    <>
+      {
+        chatRoom?.length ? chatRoom.map((contact) => {
+          return (
+            <div  key={contact?._id} className="h-full py-1">
+              <EachChat contact={contact} />
+            </div>
+          )}
+        ) :
+        <div className="h-full flex justify-center items-center">
+          <div className="absolute top-[50%] translate-y-[-50%] text-center font-poppins">
+            <div className="w-[200px] h-[200px] shadow-lg bg-blue-800 bg-opacity-30 rounded-full flex justify-center items-center">
+              <BsFillChatFill className="w-[100px] h-[100px] text-blue-900 overflow-visible opacity-70 stroke-white stroke-1 box-border" />
+            </div>
+            <p className="font-right mt-4 text-white/70">Start a New Chat</p>
+          </div>
+        </div>
+      }
+    </>
     );
 }
   

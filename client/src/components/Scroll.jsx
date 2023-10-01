@@ -1,13 +1,17 @@
 import React from "react";
 import './Scroll.css';
 
-const Scroll=(props)=>{
+const Scroll=({children, width})=>{
     return (
-        <div className="scrollbar overflow-y-auto"  id='style-1'
+        <div className={`scrollbar overflow-y-auto h-full w-[${width}]`}  id='style-1'
         >
-            {props.children}
+            {children}
         </div>
     );
+}
+
+Scroll.defaultProps = {
+    width: 'full'
 }
 
 export default Scroll;

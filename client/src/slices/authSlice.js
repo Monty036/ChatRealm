@@ -8,18 +8,24 @@ const authSlice  = createSlice({
     name: 'auth',
     initialState,
     reducers: {
-        setCredentials(state, action) {
-            state.userinfo = action.payload;
-            localStorage.setItem('userinfo', JSON.stringify(action.payload));
+        setCredentials(state, { payload }) {
+            state.userinfo = payload;
+            localStorage.setItem('userinfo', JSON.stringify(payload));
         },
         logout(state, action) {
             state.userinfo = null;
             localStorage.removeItem('userinfo');
+        },
+        updateFriendRequestState(state, { payload }) {
+            if(state.userinfo?.friendRequests) {
+                state.userinfo.friendRequests = state.userinfo.friendRequests.concat(payload);
+            }
+            else state.userinfo.friendRequests = payload;   
         }
     }
 });
 
-export const { setCredentials, logout } = authSlice.actions;
+export const { setCredentials, logout, updateFriendRequestState } = authSlice.actions;
 
 export default authSlice.reducer;
 

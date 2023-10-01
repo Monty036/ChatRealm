@@ -2,19 +2,25 @@ const path = require("path"),
   express = require("express"),
   morgan = require("morgan"),
   bodyParser = require("body-parser"),
-  cors = require("cors");
+  cors = require("cors")
 
 // Load Routers
 const userRoutes = require('../routes/userRoutes');
+const chatRoutes = require('../routes/chatRoutes');
 
 // Middleware
 const { errorHandler, notFound } = require('../middleware/errorMiddleware');
+const cookieParser = require("cookie-parser");
 
 module.exports.init = () => {
   //initialize app
   const app = express();
+  app.use(cookieParser());
 
-  app.use(cors());
+  app.use(cors({
+    origin: 'http://localhost:3000',
+    credentials: true
+  }));
 
   //morgan used for logging HTTP requests to the console
   app.use(morgan("dev"));
@@ -22,6 +28,11 @@ module.exports.init = () => {
   //bodyParser middleware used for resolving the req and res body objects (urlEncoded and json formats)
   app.use(bodyParser.urlencoded({ extended: true }));
   app.use(bodyParser.json());
+  app.use(function(req, res, next) {  
+    res.header('Access-Control-Allow-Origin', req.headers.origin);
+    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+    next();
+  });  
 
   //add routers for /api
   app.use('/api/test', (req, res) => {
@@ -30,6 +41,7 @@ module.exports.init = () => {
 
   const masterRouter = express.Router();
   masterRouter.use('/user', userRoutes);
+  masterRouter.use('/chat', chatRoutes);
   masterRouter.use(notFound);
   masterRouter.use(errorHandler);
 

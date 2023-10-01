@@ -2,9 +2,10 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate }  from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
-import { useLoginMutation, useRegisterMutation } from '../slices/userApiSlice';
+import { useLoginMutation, useRegisterMutation } from '../api/userApiSlice';
 import { setCredentials } from '../slices/authSlice';
 import { toast } from 'react-toastify';
+import Loading from './Loading';
 
 const Login = () => {
 
@@ -14,10 +15,10 @@ const Login = () => {
     const [password, setPassword] = useState("");
   
     const navigate = useNavigate();
-    const dispath = useDispatch();
+    const dispatch = useDispatch();
   
-    const [login, { isLoading1 }] = useLoginMutation();
-    const [register, {isLoading2 }] = useRegisterMutation();
+    const [login, { isLoading: isLoading1}] = useLoginMutation();
+    const [register, {isLoading: isLoading2 }] = useRegisterMutation();
     let isLoading = isLoading1 || isLoading2;
 
     const {userinfo} = useSelector((state) => state.auth);
@@ -65,9 +66,9 @@ const Login = () => {
   
       try {
         const res = await login({ id: email, password }).unwrap();
-        if(res.message) toast(res.message);
+        if(res.message) if(process.env.NODE_ENV === 'development') toast(res.message);
 
-        dispath(setCredentials(res.data));
+        dispatch(setCredentials(res.data.user));
         navigate('/chat');
       } catch (err) {
         toast(err?.data?.message || err);
@@ -78,9 +79,8 @@ const Login = () => {
     const registerUser = async () => {
       try {
         const res = await register({ email, password, fullname }).unwrap();
-        if(res.message) toast(res.message);
-
-        dispath(setCredentials(res.data));
+        if(res.message) if(process.env.NODE_ENV === 'development') toast(res.message);
+        dispatch(setCredentials(res.data.user));
         navigate('/chat');
       } catch (err) {
         toast(err?.data?.message || err);
@@ -96,24 +96,28 @@ const Login = () => {
           { loginPage ? 'Login': 'Sign Up' } {/*for <span className='text-red-700'>OP CHATAPP</span>*/}
         </div>
         <div className='my-3 flex flex-row justify-center'>
-          <input  type="text" placeholder={loginPage ? "Username / Email" : "Email" } value={email} className='placeholder-slate-700 opacity-60 bg-slate-300  font-roboto p-2 px-3 rounded-lg' 
+          <input  
+            type="text"
+            autoComplete='username' 
+            placeholder={loginPage ? "Username / Email" : "Email" } 
+            value={email} className='placeholder-slate-700 opacity-60 bg-slate-300  font-poppins p-2 px-3 rounded-lg' 
             onChange={(e) => { setEmail(e.target.value); }}
           />
         </div>
         
         {!loginPage && <div className='my-3 flex flex-row justify-center'>
-          <input type="text" placeholder="Full Name" value={fullname} className='placeholder-slate-700 opacity-60 bg-slate-300 font-roboto p-2 px-3 rounded-lg' 
+          <input type="text" placeholder="Full Name" value={fullname} className='placeholder-slate-700 opacity-60 bg-slate-300 font-poppins p-2 px-3 rounded-lg' 
             onChange={(e) => { setFullname(e.target.value); }}
           />
         </div>}   
 
         <div className='my-3 flex flex-row justify-center'>
-          <input type="password" placeholder="Password" value={password} className='placeholder-slate-700 opacity-60 bg-slate-300 font-roboto p-2 px-3 rounded-lg' 
+          <input type="password" autoComplete='current-password' placeholder="Password" value={password} className='placeholder-slate-700 opacity-60 bg-slate-300 font-poppins p-2 px-3 rounded-lg' 
             onChange={(e) => { setPassword(e.target.value); }}
           />
         </div>        
 
-        <div className='mt-7 font-roboto text-center'>
+        <div className='mt-7 font-poppins text-center'>
           {
             loginPage ? 
             <div>
@@ -131,7 +135,7 @@ const Login = () => {
           <button disabled={isLoading} type='submit' className='hover:bg-blue-700 bg-blue-400 p-2 px-4 rounded-lg text-white'
             onClick={(e) => { validateDetails(e); }}
           >
-            { loginPage ? 'Login' : 'Sign Up' }
+            { isLoading ? <Loading/> : loginPage ? 'Login' : 'Sign Up' }
           </button>
         </div>
       </form>
